@@ -12,6 +12,7 @@ def add_user(request):
                 data = json.loads(request.body.decode('utf-8'))  # Parse JSON data from the request
                 age = data.get('age')
                 age = int(age) if age and age.isdigit() else None
+                
 
                 user = User(
                         first_name=data['first_name'],
