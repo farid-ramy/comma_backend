@@ -9,11 +9,28 @@ from .models import User
 @require_http_methods(["POST"]) 
 def add_user(request):
         try:
+
                 data = json.loads(request.body.decode('utf-8'))  # Parse JSON data from the request
                 age = data.get('age')
                 age = int(age) if age and age.isdigit() else None
                 
+                required_field= ['first_name', 'last_name', 'password']
+                for field in required_field:
+                        if field not in data:
+                                return JsonResponse({'error':"missing requried field:{field}"},status=400)
 
+                         
+                       
+                email = data.get('email')
+                if not email or not validate_email(email):
+                        return JsonResponse({'error':"invalid email address"},status=400)
+
+                if User.objects.filter(username=data.get('username')).exists():
+                       return JsonResponse({'error': 'Username is already in use'}, status=400)
+                if User.objects.filter(email=email).exists():
+                       return JsonResponse({'error': 'Email address is already in use'}, status=400)
+                if User.objects.filter(phone=data.get('phone')).exists():
+                       return JsonResponse({'error': 'Phone number is already in use'}, status=400)
                 user = User(
                         first_name=data['first_name'],
                         last_name=data['last_name'],
@@ -32,6 +49,18 @@ def add_user(request):
                 return JsonResponse({'message': 'User created successfully'})
         except json.JSONDecodeError as e:
                 return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        
+def validate_email(email):
+    from django.core.validators import validate_email
+    from django.core.exceptions import ValidationError
+
+    try:
+        validate_email(email)
+        return True
+    except ValidationError:
+        return False
+
+
 
 @csrf_exempt  
 @require_http_methods(["GET"]) 
@@ -75,11 +104,32 @@ def get_user_by_id(request, user_id):
                 return JsonResponse(user_data)
         except User.DoesNotExist:
                 return JsonResponse({'error': 'User not found'}, status=404)
-
-@csrf_exempt 
-@require_http_methods(["PUT"]) 
+@csrf_exempt
+@require_http_methods(["PUT"])
 def update_user(request, user_id):
-        pass
+    try:
+
+        user = User.objects.get(pk=user_id)
+
+        data = json.loads(request.body.decode('utf-8'))
+
+        user.first_name = data.get('first_name', user.first_name)
+        user.last_name = data.get('last_name', user.last_name)
+        user.email = data.get('email', user.email)
+        user.phone = data.get('phone', user.phone)
+        user.age = data.get('age', user.age)
+        user.job = data.get('job', user.job)
+        user.address = data.get('address', user.address)
+        user.role = data.get('role', user.role)
+        user.national_id = data.get('national_id', user.national_id)
+
+        user.save()
+
+        return JsonResponse({'message': 'User updated successfully'})
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except json.JSONDecodeError as e:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
 
 @csrf_exempt 
 @require_http_methods(["DELETE"]) 
