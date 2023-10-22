@@ -9,14 +9,21 @@ from .models import Package
 @require_http_methods(["POST"])
 def add_package(request):
     try:
-        data = json.loads(request.body.decode('utf-8'))
-        package = Package(
+       data = json.loads(request.body)
+       package_name = data.get('name', '')
+       if Package.objects.filter(name=package_name).exists():
+            return JsonResponse({'error': 'A package with the same name already exists'}, status=400)
+       price = data.get('price','')
+       if not price.replace(".","",1).isdigit():
+           return JsonResponse({'error': "invalid price must be an integer "}, status=400)
+
+       package = Package(
             name=data['name'],
             description=data.get('description', ''),
             price=data['price'],
         )
-        package.save()
-        return JsonResponse({'message': 'Package created successfully'})
+       package.save()
+       return JsonResponse({'message': 'Package created successfully'})
     except json.JSONDecodeError as e:
         return JsonResponse({'error': 'Invalid JSON data'}, status=400)
     
