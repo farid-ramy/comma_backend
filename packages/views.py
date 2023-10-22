@@ -91,6 +91,3 @@ def delete_package(request, package_id):
         return JsonResponse({'message': 'Package deleted successfully'})
     except Package.DoesNotExist:
         return JsonResponse({'error': 'Package not found'}, status=404)
-# Create your views here.
-
-# Create your views here.
