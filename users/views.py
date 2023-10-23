@@ -44,7 +44,7 @@ def addUser(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
         # Return validation errors with a status of 400 (Bad Request)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors)
 
 # Update user information
 @api_view(['PUT'])
