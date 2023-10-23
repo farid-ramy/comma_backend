@@ -1,162 +1,106 @@
-import json
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
+from .serializers import UserSerializer
 from .models import User
 
-@csrf_exempt  # Use this decorator to disable CSRF protection for this view for simplicity (not recommended for production)
-@require_http_methods(["POST"]) 
-def addUser(request):
-        try:
-
-                data = json.loads(request.body.decode('utf-8'))  # Parse JSON data from the request
-                age = data.get('age')
-                age = int(age) if age and age.isdigit() else None
-                
-                required_field= ['first_name', 'last_name', 'password']
-                for field in required_field:
-                        if field not in data:
-                                return JsonResponse({'error':"missing requried field:{field}"},status=400)
-
-                         
-                       
-                email = data.get('email')
-                if not email or not validate_email(email):
-                        return JsonResponse({'error':"invalid email address"},status=400)
-
-                if User.objects.filter(username=data.get('username')).exists():
-                       return JsonResponse({'error': 'Username is already in use'}, status=400)
-                if User.objects.filter(email=email).exists():
-                       return JsonResponse({'error': 'Email address is already in use'}, status=400)
-                if User.objects.filter(phone=data.get('phone')).exists():
-                       return JsonResponse({'error': 'Phone number is already in use'}, status=400)
-                user = User(
-                        first_name=data['first_name'],
-                        last_name=data['last_name'],
-                        username=data.get('username'),
-                        password=data.get('password'),
-                        email=data.get('email'),
-                        phone=data.get('phone'),
-                        age=age,
-                        job=data.get('job'),
-                        address=data.get('address'),
-                        role=data.get('role'),
-                        national_id=data.get('national_id')
-                )
-                user.save()
-
-                return JsonResponse({'message': 'User created successfully'})
-        except json.JSONDecodeError as e:
-                return JsonResponse({'error': 'Invalid JSON data'}, status=400)
-        
-def validate_email(email):
-    from django.core.validators import validate_email
-    from django.core.exceptions import ValidationError
-
-    try:
-        validate_email(email)
-        return True
-    except ValidationError:
-        return False
-
-@csrf_exempt  
-@require_http_methods(["GET"]) 
+# Get all users
+@api_view(["GET"])
 def getAllUsers(request):
-        users = User.objects.all()
-        user_list = []
+    # Retrieve all user objects from the database
+    users = User.objects.all()
+    # Serialize the user objects using the UserSerializer
+    serializer = UserSerializer(users, many=True)
+    # Return the serialized data as a JSON response
+    return Response(serializer.data)
 
-        for user in users:
-                user_data = {
-                'id': user.id,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'email': user.email,
-                'phone': user.phone,
-                'age': user.age,
-                'job': user.job,
-                'address': user.address,
-                'role': user.role,
-                'national_id': user.national_id,}
-                user_list.append(user_data)
-
-        return JsonResponse({'users': user_list})
-
-@csrf_exempt  
-@require_http_methods(["GET"]) 
+# Get a user by their ID
+@api_view(["GET"])
 def getUserById(request, userId):
-        try:
-                user = User.objects.get(pk=userId)
-                user_data = {
-                'id': user.id,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'email': user.email,
-                'phone': user.phone,
-                'age': user.age,
-                'job': user.job,
-                'address': user.address,
-                'role': user.role,
-                'national_id': user.national_id,}
-
-                return JsonResponse(user_data)
-        except User.DoesNotExist:
-                return JsonResponse({'error': 'User not found'}, status=404)
-
-@csrf_exempt
-@require_http_methods(["PUT"])
-def updateUser(request, user_id):
     try:
-
-        user = User.objects.get(pk=user_id)
-
-        data = json.loads(request.body.decode('utf-8'))
-
-        user.first_name = data.get('first_name', user.first_name)
-        user.last_name = data.get('last_name', user.last_name)
-        user.email = data.get('email', user.email)
-        user.phone = data.get('phone', user.phone)
-        user.age = data.get('age', user.age)
-        user.job = data.get('job', user.job)
-        user.address = data.get('address', user.address)
-        user.role = data.get('role', user.role)
-        user.national_id = data.get('national_id', user.national_id)
-
-        user.save()
-
-        return JsonResponse({'message': 'User updated successfully'})
+        # Try to retrieve a user by their primary key (ID)
+        user = User.objects.get(pk=userId)
+        # Serialize the user object using the UserSerializer
+        serializer = UserSerializer(user)
+        # Return the serialized user data as a JSON response
+        return Response(serializer.data)
     except User.DoesNotExist:
-        return JsonResponse({'error': 'User not found'}, status=404)
-    except json.JSONDecodeError as e:
-        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        # Return an error response if the user does not exist
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
-@csrf_exempt 
-@require_http_methods(["DELETE"]) 
-def deleteUser(request, user_id):
-        try:
-                user = User.objects.get(pk=user_id)
-                user.delete()
-                return JsonResponse({'message': 'User deleted successfully'})
-        except User.DoesNotExist:
-                return JsonResponse({'error': 'User not found'}, status=404)
+# Create a new user
+@csrf_exempt  # Disables CSRF protection (for demonstration purposes only)
+@api_view(['POST'])
+def addUser(request):
+    # Create a UserSerializer instance with the data from the request
+    serializer = UserSerializer(data=request.data)
 
-@csrf_exempt 
-@require_http_methods(["POST"])
-def handelLogin(request):
-        try:
-                login_data = json.loads(request.body)
-                username = login_data.get('username')
-                password = login_data.get('password')
+    if serializer.is_valid():
+        # Save the user to the database
+        user = serializer.save()
+        # Return the serialized user data with a status of 201 (Created)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        # Return validation errors with a status of 400 (Bad Request)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-                # Authenticate the user
-                user = authenticate(request, username=username, password=password)
+# Update user information
+@api_view(['PUT'])
+def updateUser(request, userId):
+    try:
+        # Try to retrieve the user to be updated
+        user = User.objects.get(pk=userId)
+    except User.DoesNotExist:
+        # Return an error response if the user does not exist
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
-                if user is not None:
-                # Log the user in
-                        login(request, user)
-                        return JsonResponse({'message': 'Login successful'})
-                else:
-                        return JsonResponse({'error': 'Invalid credentials'}, status=401)
+    if request.method == 'PUT':
+        # Create a UserSerializer instance with the user and the data from the request
+        serializer = UserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            # Save the updated user data
+            serializer.save()
+            # Return the updated user data with a status of 200 (OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            # Return validation errors with a status of 400 (Bad Request)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        except Exception as e:
-                return JsonResponse({'error': 'Error during login', 'details': str(e)}, status=500)
+# Delete a user
+@api_view(['DELETE'])
+def deleteUser(request, userId):
+    try:
+        # Try to retrieve the user to be deleted
+        user = User.objects.get(pk=userId)
+        # Delete the user
+        user.delete()
+        # Return a success message with a status of 204 (No Content)
+        return Response({'message': 'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    except User.DoesNotExist:
+        # Return an error response if the user does not exist
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+# Handle user login
+@csrf_exempt  # Disables CSRF protection (for demonstration purposes only)
+@api_view(['POST'])
+def handleLogin(request):
+    # Extract the username and password from the request data
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    if username is None or password is None:
+        # Return an error response if username or password is missing
+        return Response({'error': 'Please provide both username and password'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Authenticate the user
+    user = authenticate(request, username=username, password=password)
+
+    if user is not None:
+        # Log in the user and return a success message
+        login(request, user)
+        return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+    else:
+        # Return an error message if authentication fails
+        return Response({'error': 'Login failed. Please check your credentials.'}, status=status.HTTP_401_UNAUTHORIZED)

@@ -7,5 +7,5 @@ urlpatterns = [
     path('users/<int:userId>', views.getUserById),
     path('users/update/<int:userId>', views.updateUser),
     path('users/delete/<int:userId>', views.deleteUser),
-    path('handel_login', views.handelLogin),
+    path('handel_login', views.handleLogin),
 ]
