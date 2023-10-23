@@ -1,93 +1,83 @@
-import json
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-from django.http import JsonResponse
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
+from .serializers import PackageSerializer
 from .models import Package
 
-@csrf_exempt
-@require_http_methods(["POST"])
-def add_package(request):
-    try:
-       data = json.loads(request.body)
-       package_name = data.get('name', '')
-       if Package.objects.filter(name=package_name).exists():
-            return JsonResponse({'error': 'A package with the same name already exists'}, status=400)
-       price = data.get('price','')
-       if not price.replace(".","",1).isdigit():
-           return JsonResponse({'error': "invalid price must be an integer "}, status=400)
-
-       package = Package(
-            name=data['name'],
-            description=data.get('description', ''),
-            price=data['price'],
-        )
-       package.save()
-       return JsonResponse({'message': 'Package created successfully'})
-    except json.JSONDecodeError as e:
-        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
-    
-
-@csrf_exempt
-@require_http_methods(["GET"])
-def get_all_packages(request):
+# Define an API view to retrieve all Package objects
+@api_view(["GET"])
+def getAllPackages(request):    
+    # Retrieve all Package objects from the database
     packages = Package.objects.all()
-    package_list = []
-    for package in packages:
-        package_data = {
-            'id': package.id,
-            'name': package.name,
-            'description': package.description,
-            'price': package.price,
-        }
-        package_list.append(package_data)
-    return JsonResponse({'packages': package_list})
+    # Serialize the data using PackageSerializer
+    serializer = PackageSerializer(packages, many=True)
+    # Return the serialized data in the response
+    return Response(serializer.data)
 
-
-@csrf_exempt
-@require_http_methods(["GET"])
-def get_package_by_id(request, package_id):
+# Define an API view to retrieve a Package object by its ID
+@api_view(["GET"])
+def getPackageById(request, packageId):
     try:
-        package = Package.objects.get(pk=package_id)
-        package_data = {
-            'id': package.id,
-            'name': package.name,
-            'description': package.description,
-            'price': package.price,
-        }
-        return JsonResponse(package_data)
+        # Attempt to retrieve a Package by its primary key (ID)
+        package = Package.objects.get(pk=packageId)
+        # Serialize the retrieved package
+        serializer = PackageSerializer(package)
+        # Return the serialized package data
+        return Response(serializer.data)
     except Package.DoesNotExist:
-        return JsonResponse({'error': 'Package not found'}, status=404)
-    
+        # Return a 404 error response if the package is not found
+        return Response({'error': 'Package not found'}, status=status.HTTP_404_NOT_FOUND)
 
-@csrf_exempt
-@require_http_methods(["PUT"])
-def update_package(request, package_id):
+
+@csrf_exempt # Disable CSRF protection for the following view (for demonstration purposes)
+# Define an API view to add a new Package
+@api_view(["POST"])
+def addPackage(request):
+    # Serialize the data from the request using PackageSerializer
+    serializer = PackageSerializer(data=request.data)
+
+    if serializer.is_valid():
+        # If the data is valid, save the new Package
+        package = serializer.save()
+        # Return the serialized data with a 201 status code (Created)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        # Return validation errors if the data is invalid
+        return Response(serializer.errors)
+
+# Define an API view to update an existing Package
+@api_view(["PUT"])
+def updatePackage(request, packageId):
     try:
-        package = Package.objects.get(pk=package_id)
-        data = json.loads(request.body.decode('utf-8'))
-
-        # Update package attributes
-        package.name = data.get('name', package.name)
-        package.description = data.get('description', package.description)
-        package.price = data.get('price', package.price)
-        package.save()
-
-        return JsonResponse({'message': 'Package updated successfully'})
+        # Attempt to retrieve the existing Package by its ID
+        package = Package.objects.get(pk=packageId)
     except Package.DoesNotExist:
-        return JsonResponse({'error': 'Package not found'}, status=404)
-    except json.JSONDecodeError as e:
-        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
-    
+        # Return a 404 error response if the package is not found
+        return Response({'error': 'Package not found'}, status=status.HTTP_404_NOT_FOUND)
 
+    if request.method == 'PUT':
+        # Serialize the existing Package with the updated data from the request
+        serializer = PackageSerializer(package, data=request.data)
+        if serializer.is_valid():
+            # If the data is valid, save the updated Package
+            serializer.save()
+            # Return the updated data with a 200 status code (OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            # Return validation errors with a 400 status code (Bad Request) if the data is invalid
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
-@csrf_exempt
-@require_http_methods(["DELETE"])
-def delete_package(request, package_id):
+# Define an API view to delete a Package by its ID
+@api_view(["DELETE"])
+def deletePackage(request, packageId):
     try:
-        package = Package.objects.get(pk=package_id)
+        # Attempt to retrieve the Package by its ID
+        package = Package.objects.get(pk=packageId)
+        # Delete the Package
         package.delete()
-        return JsonResponse({'message': 'Package deleted successfully'})
+        # Return a success message with a 204 status code (No Content)
+        return Response({'message': 'Package deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
     except Package.DoesNotExist:
-        return JsonResponse({'error': 'Package not found'}, status=404)
+        # Return a 404 error response if the package is not found
+        return Response({'error': 'Package not found'}, status=status.HTTP_404_NOT_FOUND)
