@@ -7,7 +7,7 @@ from .models import User
 
 @csrf_exempt  # Use this decorator to disable CSRF protection for this view for simplicity (not recommended for production)
 @require_http_methods(["POST"]) 
-def add_user(request):
+def addUser(request):
         try:
 
                 data = json.loads(request.body.decode('utf-8'))  # Parse JSON data from the request
@@ -60,11 +60,9 @@ def validate_email(email):
     except ValidationError:
         return False
 
-
-
 @csrf_exempt  
 @require_http_methods(["GET"]) 
-def get_all_users(request):
+def getAllUsers(request):
         users = User.objects.all()
         user_list = []
 
@@ -86,9 +84,9 @@ def get_all_users(request):
 
 @csrf_exempt  
 @require_http_methods(["GET"]) 
-def get_user_by_id(request, user_id):
+def getUserById(request, userId):
         try:
-                user = User.objects.get(pk=user_id)
+                user = User.objects.get(pk=userId)
                 user_data = {
                 'id': user.id,
                 'first_name': user.first_name,
@@ -104,9 +102,10 @@ def get_user_by_id(request, user_id):
                 return JsonResponse(user_data)
         except User.DoesNotExist:
                 return JsonResponse({'error': 'User not found'}, status=404)
+
 @csrf_exempt
 @require_http_methods(["PUT"])
-def update_user(request, user_id):
+def updateUser(request, user_id):
     try:
 
         user = User.objects.get(pk=user_id)
@@ -133,7 +132,7 @@ def update_user(request, user_id):
 
 @csrf_exempt 
 @require_http_methods(["DELETE"]) 
-def delete_user(request, user_id):
+def deleteUser(request, user_id):
         try:
                 user = User.objects.get(pk=user_id)
                 user.delete()
@@ -143,7 +142,7 @@ def delete_user(request, user_id):
 
 @csrf_exempt 
 @require_http_methods(["POST"])
-def handel_login(request):
+def handelLogin(request):
         try:
                 login_data = json.loads(request.body)
                 username = login_data.get('username')
