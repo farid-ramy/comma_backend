@@ -26,6 +26,33 @@ def deleteBranch(request,branchId):
     except Branch.DoesNotExist:
         return Response({'error': 'branch not found'}, status= status.HTTP_404_NOT_FOUND)
     
+@api_view(["PUT"])
+def updateBranch(request,branchId):
+    try:
+        branch= Branch.objects.get(pk=branchId)
+    except Branch.DoesNotExist:
+        return Response({'error': 'branch not found'}, status= status.HTTP_404_NOT_FOUND)
+    if request.method == 'PUT':    
+        serializer = BranchSerializer(branch, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        else:
+            return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
         
+@api_view(["GET"])
+def getAllBranches(request):
+    branches = Branch.objects.all()
+    serializer = BranchSerializer(branches, many=True)
+    return Response(serializer.data) 
+ 
+@api_view(["GET"])
+def getBranchById(request,branchId):
+    try:
+        branch = Branch.objects.get(pk=branchId)
+        serializer = BranchSerializer(branch)
+        return Response(serializer.data)
+    except Branch.DoesNotExist:
+        return Response({'error': 'branch not found'}, status= status.HTTP_404_NOT_FOUND)        
 
 
