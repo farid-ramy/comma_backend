@@ -16,4 +16,16 @@ def addBranch(request):
     return Response(serializer.errors, status=400)
 
 
+    
+@api_view(["DELETE"])
+def deleteBranch(request,branchId):
+    try:
+        branch= Branch.objects.get(pk=branchId)
+        branch.delete()
+        return Response({'branch deleted successfully'})
+    except Branch.DoesNotExist:
+        return Response({'error': 'branch not found'}, status= status.HTTP_404_NOT_FOUND)
+    
+        
+
 
