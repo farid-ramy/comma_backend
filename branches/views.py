@@ -1,26 +1,31 @@
-from django.shortcuts import render
-import json
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-from django.http import JsonResponse
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
+from .serializers import BranchSerializer
 from .models import Branch
 
+@api_view(["POST"])
+def addBranch(request):
+    # Serialize the request data using BranchSerializer
+    serializer = BranchSerializer(data=request.data)
+    if serializer.is_valid():
+        # Save the validated data to create a new Branch object
+        serializer.save()
+        return Response(serializer.data, status=201)
+    return Response(serializer.errors, status=400)
 
-# @csrf_exempt
-# @require_http_methods(["POST"])
-# def add_branch(request):
-#     try:
-#         data=json.loads(request.body)
-#         bracchname= data.get('name','')
-#         if Branch.objects.filter(name=bracchname).exists():
-#             return JsonResponse({"error":"a branch with the same name already exists"})
+
+    
+@api_view(["DELETE"])
+def deleteBranch(request,branchId):
+    try:
+        branch= Branch.objects.get(pk=branchId)
+        branch.delete()
+        return Response({'branch deleted successfully'})
+    except Branch.DoesNotExist:
+        return Response({'error': 'branch not found'}, status= status.HTTP_404_NOT_FOUND)
+    
         
-
-
-#     except:
-
-# # Create your views here.
-
 
 
