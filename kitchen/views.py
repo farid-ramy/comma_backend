@@ -3,8 +3,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Kitchen
 from .serializers import KitchenSerializer
-from .models import Branch  # Import the Branch model
+# # from .models import Branch 
+# from .serializers import ProductSerializer,BranchSerializer
+from .models import Branch
 from .serializers import ProductSerializer,BranchSerializer
+
 
 @api_view(['POST'])
 def addKitchenForBranch(request, branch_id):
