@@ -5,54 +5,84 @@ from rest_framework import status
 from .serializers import BranchSerializer
 from .models import Branch
 
+# View to get all branches
+@api_view(["GET"])
+def getAllBranches(request):
+    # Retrieve all Branch objects from the database
+    branches = Branch.objects.all()
+    
+    # Serialize the data using BranchSerializer
+    serializer = BranchSerializer(branches, many=True)
+    
+    # Return the serialized data as a response
+    return Response(serializer.data)
+
+# View to get a branch by its ID
+@api_view(["GET"])
+def getBranchById(request, branchId):
+    try:
+        # Attempt to retrieve a specific Branch by its ID
+        branch = Branch.objects.get(pk=branchId)
+        
+        # Serialize the found branch and return it as a response
+        serializer = BranchSerializer(branch)
+        return Response(serializer.data)
+    except Branch.DoesNotExist:
+        # Handle the case where the branch with the specified ID is not found
+        return Response({'error': 'Branch not found'}, status=status.HTTP_404_NOT_FOUND)
+
+# View to add a new branch
+@csrf_exempt  # Exempts this view from CSRF protection (use with caution)
 @api_view(["POST"])
 def addBranch(request):
     # Serialize the request data using BranchSerializer
     serializer = BranchSerializer(data=request.data)
+    
     if serializer.is_valid():
         # Save the validated data to create a new Branch object
         serializer.save()
-        return Response(serializer.data, status=201)
-    return Response(serializer.errors, status=400)
+        
+        # Return the newly created branch data as a response with a 201 status code
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        # Return validation errors with a 400 status code if data is not valid
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-    
+# View to delete a branch by its ID
 @api_view(["DELETE"])
-def deleteBranch(request,branchId):
+def deleteBranch(request, branchId):
     try:
-        branch= Branch.objects.get(pk=branchId)
+        # Attempt to retrieve a specific Branch by its ID
+        branch = Branch.objects.get(pk=branchId)
+        
+        # Delete the found branch
         branch.delete()
-        return Response({'branch deleted successfully'})
+        
+        # Return a success message as a response
+        return Response({'message': 'Branch deleted successfully'})
     except Branch.DoesNotExist:
-        return Response({'error': 'branch not found'}, status= status.HTTP_404_NOT_FOUND)
-    
+        # Handle the case where the branch with the specified ID is not found
+        return Response({'error': 'Branch not found'}, status=status.HTTP_404_NOT_FOUND)
+
+# View to update a branch by its ID
 @api_view(["PUT"])
-def updateBranch(request,branchId):
+def updateBranch(request, branchId):
     try:
-        branch= Branch.objects.get(pk=branchId)
+        # Attempt to retrieve a specific Branch by its ID
+        branch = Branch.objects.get(pk=branchId)
     except Branch.DoesNotExist:
-        return Response({'error': 'branch not found'}, status= status.HTTP_404_NOT_FOUND)
-    if request.method == 'PUT':    
+        # Handle the case where the branch with the specified ID is not found
+        return Response({'error': 'Branch not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'PUT':
+        # Serialize and update the branch with the request data
         serializer = BranchSerializer(branch, data=request.data)
         if serializer.is_valid():
+            # Save the updated data
             serializer.save()
-            return Response(serializer.data, status=201)
+            
+            # Return the updated branch data with a 201 status code
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
-        
-@api_view(["GET"])
-def getAllBranches(request):
-    branches = Branch.objects.all()
-    serializer = BranchSerializer(branches, many=True)
-    return Response(serializer.data) 
- 
-@api_view(["GET"])
-def getBranchById(request,branchId):
-    try:
-        branch = Branch.objects.get(pk=branchId)
-        serializer = BranchSerializer(branch)
-        return Response(serializer.data)
-    except Branch.DoesNotExist:
-        return Response({'error': 'branch not found'}, status= status.HTTP_404_NOT_FOUND)        
-
-
+            # Return validation errors with a 400 status code if data is not valid
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
