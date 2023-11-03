@@ -114,13 +114,11 @@ def handleLogin(request):
         # Return an error response if username or password is missing
         return Response({'error': 'Please provide both username and password'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Authenticate the user
-    user = authenticate(request, username=username, password=password)
+    user = User.objects.get(username=username , password=password )
 
     if user is not None:
-        # Log in the user and return a success message
-        login(request, user)
-        return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     else:
         # Return an error message if authentication fails
         return Response({'error': 'Login failed. Please check your credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
