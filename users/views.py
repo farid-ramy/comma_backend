@@ -16,6 +16,26 @@ def getAllUsers(request):
     # Return the serialized data as a JSON response
     return Response(serializer.data)
 
+# Get all clients
+@api_view(["GET"])
+def getAllClients(req):
+    # Use the filter method to get all users with the role "client"
+    clients = User.objects.filter(role="client")
+    # Serialize the clients objects using the UserSerializer
+    serializer = UserSerializer(clients, many=True)
+    # Return the serialized data as a JSON response
+    return Response(serializer.data)
+
+# Get all employees
+@api_view(["GET"])
+def getAllEmployees(req):
+    # Use the filter method to get all users with the role "employee"
+    employees = User.objects.filter(role="employee")
+    # Serialize the employees objects using the UserSerializer
+    serializer = UserSerializer(employees, many=True)
+    # Return the serialized data as a JSON response
+    return Response(serializer.data)
+
 # Get a user by their ID
 @api_view(["GET"])
 def getUserById(request, userId):
