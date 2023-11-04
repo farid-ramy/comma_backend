@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 class Branch(models.Model):
     name = models.CharField(max_length=50, unique=True)
     address = models.TextField(blank=True ,null=True)
@@ -7,7 +7,8 @@ class Branch(models.Model):
     manager_name = models.CharField(max_length=50, blank=True,null=True)
     opening_hours = models.CharField(max_length=100, blank=True,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)  
+    modified_at = models.DateTimeField(auto_now=True) 
+    employee_id = models.ForeignKey(User, on_delete=models.CASCADE,to_field='id', default=None,blank=True,null=True)
 
     def __str__(self):
         return self.name
