@@ -9,7 +9,7 @@ class History (models.Model):
 
      checkin_time = models.DateTimeField(auto_now_add=True)
      checkout_time = models.DateTimeField(null=True, blank=True)
-     price = models.DecimalField(max_digits=10, decimal_places=2)
+     price = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True)
      
      
      def __str__(self):
