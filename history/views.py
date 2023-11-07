@@ -8,9 +8,6 @@ from users.models import User
 from branches.models import Branch
 from django.views.decorators.csrf import csrf_exempt
 
-# Create your views here.
-# View to add a new branch
-
 @api_view(["POST"])
 def calculate_price(checkin_time, checkout_time):
     if checkin_time and checkout_time:
@@ -19,25 +16,26 @@ def calculate_price(checkin_time, checkout_time):
         return round(price, 2) 
     else:
         return 0.00  # Return 0 if times are missing
-    
 @csrf_exempt  # Exempts this view from CSRF protection (use with caution)
 @api_view(["POST"])
-def check_in(request,user_id ,branch_id):
-    if (request.method == "POST"):
+def check_in(request, user_id, branch_id):
+    if request.method == "POST":
         client = User.objects.get(id=user_id)
-        branch= Branch.objects.get(id = branch_id)
+        branch = Branch.objects.get(id=branch_id)
         check_in = datetime.now()
 
-        history_data={
-            'client_id ':client.id,
-            'branch_id ':branch.id,
-            'check_in':check_in,
+        history_data = {
+            'client_id': client.id,
+            'branch_id': branch.id,
+            'check_in': check_in,
+            # 'price':calculate_price
         }
-    serializer = HistorySerializer(data=history_data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=400)
+        serializer = HistorySerializer(data=history_data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
 
 @api_view(["PUT"])
 def check_out(request, user_id, branch_id):
