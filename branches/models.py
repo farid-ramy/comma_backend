@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
+from users.models import User
+
 class Branch(models.Model):
     name = models.CharField(max_length=50, unique=True)
     address = models.TextField(blank=True ,null=True)
