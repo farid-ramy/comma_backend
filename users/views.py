@@ -111,11 +111,10 @@ def handleLogin(request):
     password = request.data.get('password')
 
     if username is None or password is None:
-        # Return an error response if username or password is missing
-        return Response({'error': 'Please provide both username and password'})
+        return Response({'error': 'Please enter both username and password'})
     try:
         user = User.objects.get(username=username , password=password )
         serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
     except:
         return Response({'error': 'Wrong username or password'})

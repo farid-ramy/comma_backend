@@ -43,10 +43,10 @@ def addBranch(request):
         serializer.save()
         
         # Return the newly created branch data as a response with a 201 status code
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data)
     else:
         # Return validation errors with a 400 status code if data is not valid
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors)
 
 # View to delete a branch by its ID
 @api_view(["DELETE"])
