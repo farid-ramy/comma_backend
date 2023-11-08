@@ -81,3 +81,32 @@ def deletePackage(request, packageId):
     except Package.DoesNotExist:
         # Return a 404 error response if the package is not found
         return Response({'error': 'Package not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(["PUT"])
+def offeroption(request, packageId):
+    try:
+        package= Package.objects.get(pk=packageId)
+    except Package.DoesNotExist:
+        return Response({'error': 'Package not found'}, status=status.HTTP_404_NOT_FOUND)
+    if request.method =="PUT":
+        serializer=PackageSerializer(package,data=request.data, partial=True)
+        if serializer.is_valid():
+            new_offer = serializer.validated_data.get('offer')
+            if new_offer is not None:
+                if new_offer>=0 and new_offer<=100:
+                    discount = (new_offer/100)*package.price
+                    package.offer=new_offer
+                    package.price =package.price-discount 
+                    package.save()
+                    serializer= PackageSerializer(package)
+                    return Response(serializer.data,status=status.HTTP_200_OK)
+                else:
+                    return Response ({"error ":"invalid offer value "},status=status.HTTP_400_BAD_REQUEST)
+                
+            else:
+                return Response ({"error ":"you should enter a value "},status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response ({"error ": serializer.errors},status=status.HTTP_400_BAD_REQUEST)  
+                
+    
+
