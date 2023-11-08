@@ -6,14 +6,14 @@ from .serializers import PackageSerializer
 from .models import Package
 
 
-# Define an API view to retrieve all Package objects
+
+
+# /api/users/get_users
+@csrf_exempt # Disable CSRF protection for the following view (for demonstration purposes)
 @api_view(["GET"])
-def getAllPackages(request):    
-    # Retrieve all Package objects from the database
-    packages = Package.objects.all()
-    # Serialize the data using PackageSerializer
-    serializer = PackageSerializer(packages, many=True)
-    # Return the serialized data in the response
+def getAllPackages(request):
+    package = Package.objects.all()
+    serializer = PackageSerializer(package, many=True)
     return Response(serializer.data)
 
 # Define an API view to retrieve a Package object by its ID
