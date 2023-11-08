@@ -1,76 +1,81 @@
-from django.shortcuts import render
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from .models import History
-from .serializers import HistorySerializer
-from datetime import datetime
-from users.models import User
-from branches.models import Branch
 from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import ObjectDoesNotExist  # Import the exception
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from .serializers import HistorySerializer
+from .models import History
+from django.utils import timezone 
+
+# /api/history
+@api_view(["GET"])
+def getHistory(request):
+    history_data = History.objects.all()  
+    serializer = HistorySerializer(history_data, many=True)
+    return Response(serializer.data)
+
+# /api/history?...
+@api_view(["GET"])
+def filterHistory(request):
+    queryset = History.objects.all()
+
+    checkin_time = request.query_params.get('checkin_time')
+    if checkin_time:
+        queryset = queryset.filter(checkin_time__date=checkin_time)
+
+    branch_id = request.query_params.get('branch_id')
+    if branch_id:
+        queryset = queryset.filter(branch_id=branch_id)
+
+    employee_id = request.query_params.get('employee_id')
+    if employee_id:
+        queryset = queryset.filter(employee_id=employee_id)
+
+    client_id = request.query_params.get('client_id')
+    if client_id:
+        queryset = queryset.filter(client_id=client_id)
+
+    serializer = HistorySerializer(queryset, many=True)
+    return Response(serializer.data)
 
 
+# /api/history/delete<int:historyId>
+@api_view(["DELETE"])
+def deleteHistory(request,historyId):
+    try:
+        history = History.objects.get(pk=historyId)
+        history.delete()
+        return Response({'message': 'History deleted successfully'})
+    except:
+        return Response({'error': 'History not found'})
+
+
+# /api/history/check_in
+@csrf_exempt 
 @api_view(["POST"])
-def check_in(request, user_id, branch_id):
-    if request.method == "POST":
-        try:
-            client = User.objects.get(id=user_id)
-            branch = Branch.objects.get(id=branch_id)
-            checkin_time = datetime.now()
+def checkIn(request): 
+    serializer = HistorySerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors)
 
-            history_data = {
-                'client_id': client.id,
-                'branch_id': branch.id,
-                'checkin_time': checkin_time,
-            }
-            serializer = HistorySerializer(data=history_data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=400)
-        except ObjectDoesNotExist as e:
-            # Handle the case where objects do not exist (e.g., client or branch not found)
-            return Response({'message': 'Object does not exist'}, status=404)
-        except Exception as e:
-            # Handle other exceptions
-            return Response({'message': 'Internal server error'}, status=500)
-    return Response({'message': 'Invalid request method'}, status=405)
+
+# /api/history/check_out/<int:historyId>
 @api_view(["PUT"])
-def check_out(request, user_id, branch_id):
-    if request.method == 'PUT':
-        try:
-            client = User.objects.get(id=user_id)
-            branch = Branch.objects.get(id=branch_id)
-            
-            # Find the history entry to check out
-            history = History.objects.get(client_id=client, branch_id=branch, checkout_time__isnull=True)
-            history.checkout_time = datetime.now()
-            
-            # Calculate the duration and price
-            duration = (history.checkout_time - history.checkin_time).total_seconds() / 3600
-            price = duration * 10
-            
-            history_data = {
-                'checkout_time': history.checkout_time,
-                'price': round(price, 2),
-            }
-            
-            serializer = HistorySerializer(history, data=history_data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=400)
-        except ObjectDoesNotExist as e:
-            # Handle the case where objects do not exist (e.g., client or branch not found)
-            return Response({'message': 'Object does not exist'}, status=404)
-        except Exception as e:
-            # Handle other exceptions
-            return Response({'message': 'Internal server error'}, status=500)
-    return Response({'message': 'Invalid request method'}, status=405)
+def checkOut(request,historyId):    
+    try:
+        history_instance = History.objects.get(pk=historyId)
+    except:
+        return Response({'error': 'History not found'})
 
-#get all history ,delete history , get history by specific checkin (data)get history by specific branch employees ,
+    price = request.data.get('price')
 
-# price =100;discount =10%
-#x=discount /100
-#price *x
-#
+    if price is not None:
+        history_instance.checkout_time = timezone.now()
+        history_instance.price = price
+        history_instance.save()
+
+        serializer = HistorySerializer(history_instance)
+        return Response(serializer.data)
+    else:
+        return Response({'error': 'Price is requires'})
