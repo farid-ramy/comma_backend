@@ -1,88 +1,81 @@
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from rest_framework import status
 from .serializers import BranchSerializer
 from .models import Branch
+from django.http import JsonResponse
+from .models import Branch
+from .serializers import BranchSerializer
+from users.models import User
+from users.serializers import UserSerializer
 
-# View to get all branches
-@api_view(["GET"])
+# /api/branches
 def getAllBranches(request):
-    # Retrieve all Branch objects from the database
     branches = Branch.objects.all()
-    
-    # Serialize the data using BranchSerializer
-    serializer = BranchSerializer(branches, many=True)
-    
-    # Return the serialized data as a response
-    return Response(serializer.data)
+    branch_data = []
+    for branch in branches:
+        branch_serializer = BranchSerializer(branch)
+        employees = User.objects.filter(workingin__branch_id=branch)
+        employee_data = UserSerializer(employees, many=True)
+        branch_details = branch_serializer.data
+        branch_details["working_employees"] = employee_data.data
+        branch_data.append(branch_details)
+    return JsonResponse(branch_data, safe=False)
 
-# View to get a branch by its ID
+
+# /api/branches/<int:branchId>
 @api_view(["GET"])
 def getBranchById(request, branchId):
     try:
-        # Attempt to retrieve a specific Branch by its ID
         branch = Branch.objects.get(pk=branchId)
-        
-        # Serialize the found branch and return it as a response
-        serializer = BranchSerializer(branch)
-        return Response(serializer.data)
-    except Branch.DoesNotExist:
-        # Handle the case where the branch with the specified ID is not found
-        return Response({'error': 'Branch not found'}, status=status.HTTP_404_NOT_FOUND)
+        branch_data = []
+        branch_serializer = BranchSerializer(branch)
+        employees = User.objects.filter(workingin__branch_id=branch)
+        employee_data = UserSerializer(employees, many=True)
+        branch_data.append({
+            'branch_details': branch_serializer.data,
+            'working_employees': employee_data.data
+        })
+        return JsonResponse({'data': branch_data})
+    except :
+        return Response({'error': 'Branch not found'})
 
-# View to add a new branch
-@csrf_exempt  # Exempts this view from CSRF protection (use with caution)
+
+# /api/branches/add>
+@csrf_exempt
 @api_view(["POST"])
 def addBranch(request):
-    # Serialize the request data using BranchSerializer
     serializer = BranchSerializer(data=request.data)
-    
     if serializer.is_valid():
-        # Save the validated data to create a new Branch object
         serializer.save()
-        
-        # Return the newly created branch data as a response with a 201 status code
         return Response(serializer.data)
     else:
-        # Return validation errors with a 400 status code if data is not valid
         return Response(serializer.errors)
 
-# View to delete a branch by its ID
+
+# /api/branches/delete/<int:branchId>
 @api_view(["DELETE"])
 def deleteBranch(request, branchId):
     try:
-        # Attempt to retrieve a specific Branch by its ID
         branch = Branch.objects.get(pk=branchId)
-        
-        # Delete the found branch
         branch.delete()
-        
-        # Return a success message as a response
         return Response({'message': 'Branch deleted successfully'})
-    except Branch.DoesNotExist:
-        # Handle the case where the branch with the specified ID is not found
-        return Response({'error': 'Branch not found'}, status=status.HTTP_404_NOT_FOUND)
+    except:
+        return Response({'error': 'Branch not found'})
 
-# View to update a branch by its ID
+
+# /api/branches/update/<int:branchId>
 @api_view(["PUT"])
 def updateBranch(request, branchId):
     try:
-        # Attempt to retrieve a specific Branch by its ID
         branch = Branch.objects.get(pk=branchId)
-    except Branch.DoesNotExist:
-        # Handle the case where the branch with the specified ID is not found
-        return Response({'error': 'Branch not found'}, status=status.HTTP_404_NOT_FOUND)
-    
-    if request.method == 'PUT':
-        # Serialize and update the branch with the request data
         serializer = BranchSerializer(branch, data=request.data)
         if serializer.is_valid():
-            # Save the updated data
             serializer.save()
-            
-            # Return the updated branch data with a 201 status code
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data)
         else:
-            # Return validation errors with a 400 status code if data is not valid
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors)
+    except :
+        return Response({'error': 'Branch not found'})
+    
+

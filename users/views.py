@@ -1,6 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework import status
 from .serializers import UserSerializer
 from .models import User
 
@@ -73,7 +74,7 @@ def deleteUser(request, userId):
         user = User.objects.get(pk=userId)
         user.delete()
         return Response({'message': 'User deleted successfully'})
-    except:
+    except User.DoesNotExist:
         return Response({'error': 'User not found'})
 
 
