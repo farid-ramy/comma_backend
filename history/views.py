@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import History
@@ -7,8 +6,8 @@ from datetime import datetime
 from users.models import User
 from branches.models import Branch
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
-@api_view(["POST"])
 def calculate_price(checkin_time, checkout_time):
     if checkin_time and checkout_time:
         duration = (checkout_time - checkin_time).total_seconds() / 3600
@@ -16,9 +15,20 @@ def calculate_price(checkin_time, checkout_time):
         return round(price, 2) 
     else:
         return 0.00  # Return 0 if times are missing
+
+@api_view(["GET"])
+def getHistory(request):
+        history_data = History.objects.all()  # You can filter this queryset as needed
+
+    # Serialize the user objects using the UserSerializer
+        serializer = HistorySerializer(history_data, many=True)
+    # Return the serialized data as a JSON response
+        return Response(serializer.data)
+
+
 @csrf_exempt  # Exempts this view from CSRF protection (use with caution)
 @api_view(["POST"])
-def check_in(request, user_id, branch_id):
+def checkIn(request, user_id, branch_id):
     if request.method == "POST":
         client = User.objects.get(id=user_id)
         branch = Branch.objects.get(id=branch_id)
@@ -36,9 +46,8 @@ def check_in(request, user_id, branch_id):
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
 
-
 @api_view(["PUT"])
-def check_out(request, user_id, branch_id):
+def checkOut(request, user_id, branch_id):
     if request.method == 'PUT':
         client = User.objects.get(id=user_id)
         branch = Branch.objects.get(id=branch_id)
