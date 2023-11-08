@@ -1,7 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from rest_framework import status
 from .serializers import UserSerializer
 from .models import User
 
@@ -56,7 +55,7 @@ def getAllManagers(req):
 def updateUser(request, userId):
     try:
         user = User.objects.get(pk=userId)
-    except User.DoesNotExist:
+    except:
         return Response({'error': 'User not found'})
 
     serializer = UserSerializer(user, data=request.data)
@@ -74,7 +73,7 @@ def deleteUser(request, userId):
         user = User.objects.get(pk=userId)
         user.delete()
         return Response({'message': 'User deleted successfully'})
-    except User.DoesNotExist:
+    except:
         return Response({'error': 'User not found'})
 
 
@@ -102,7 +101,7 @@ def getUserById(request, userId):
         user = User.objects.get(pk=userId)
         serializer = UserSerializer(user)
         return Response(serializer.data)
-    except User.DoesNotExist:
+    except:
         return Response({'error': 'User not found'})
 
 
