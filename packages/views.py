@@ -4,19 +4,15 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from .serializers import PackageSerializer
 from .models import Package
-import logging
 
 
+# Define an API view to retrieve all Package objects
 @api_view(["GET"])
 def getAllPackages(request):    
     # Retrieve all Package objects from the database
     packages = Package.objects.all()
     # Serialize the data using PackageSerializer
     serializer = PackageSerializer(packages, many=True)
-
-    # Log the serialized data for debugging
-    logging.info(serializer.data)
-
     # Return the serialized data in the response
     return Response(serializer.data)
 
