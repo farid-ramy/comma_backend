@@ -1,18 +1,37 @@
-# Ignore Python cache files
+# Django
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# Ignore database files
+# Virtual Environment
+venv/
+env/
+*.env
+.Python
+
+# IDE (e.g. PyCharm)
+.idea/
+
+# Database
+*.sqlite3
 db.sqlite3
 
-# Ignore environment variables and sensitive data
-.env
+# Media files
+media/
 
-# Ignore project-specific settings
-/local_settings.py
+# Static files
+staticfiles/
 
-# Ignore log files
+# Compiled Python files
+*.pyc
+
+# Local development settings
+local_settings.py
+
+# Secret key
+secret_key.txt
+
+# Log files
 *.log
-
-# Ignore virtual environment directories
-venv/
+logs/

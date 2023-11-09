@@ -1,6 +1,7 @@
 from django.db import models
 from users.models import User
 from kitchen.models import Kitchen
+
 class Branch(models.Model):
     name = models.CharField(max_length=50, unique=True)
     address = models.TextField(blank=True ,null=True)

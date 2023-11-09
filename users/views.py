@@ -1,9 +1,18 @@
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from rest_framework import status
+from django.http import JsonResponse
 from .serializers import UserSerializer
 from .models import User
+from branches.models import WorkingIN
+from branches.serializers import WorkingINSerializer
+
+@api_view(['GEt'])
+def test(request, test):
+    user_instance = User.objects.get(id=test)  # Replace with the user instance you want to retrieve data for
+    user_data_with_branch = user_instance.get_user_with_branch()
+    
+    return Response(user_data_with_branch )
 
 # /api/users/add
 @csrf_exempt 
@@ -82,17 +91,35 @@ def deleteUser(request, userId):
 @csrf_exempt  
 @api_view(['POST'])
 def handleLogin(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
+        username = request.data.get('username')
+        password = request.data.get('password')
 
-    if username is None or password is None:
-        return Response({'error': 'Please enter both username and password'})
-    try:
-        user = User.objects.get(username=username , password=password )
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
-    except:
-        return Response({'error': 'Wrong username or password'})
+    # if username is None or password is None:
+    #     return Response({'error': 'Please enter both username and password'})
+    # try:
+        # user = User.objects.get(username=username , password=password )
+        working_in = WorkingIN.objects.get(employee_id= 79)
+        # working_in_INSerializer = WorkingINSerializer(working_in)
+
+        # serialized_user = {
+        # "role": user.role,
+        # "first_name": user.first_name,
+        # "last_name": user.last_name,
+        # "username": user.username,
+        # "password": user.password,
+        # "phone": user.phone,
+        # "email": user.email,
+        # "national_id": user.national_id,
+        # "age": user.age,
+        # "job": user.job,
+        # "address": user.address,
+        # "created_at": user.created_at,
+        # "modified_at": user.modified_at,
+        # };  
+        return JsonResponse(working_in)
+    # except Exception as e:
+    #     print(e)
+    #     return Response({'error': 'Wrong username or password'})
 
 
 # /api/users/get_users/<int:userId>
