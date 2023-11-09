@@ -5,84 +5,61 @@ from rest_framework import status
 from .serializers import PackageSerializer
 from .models import Package
 
-
-
-
-# /api/users/get_users
-@csrf_exempt # Disable CSRF protection for the following view (for demonstration purposes)
+#api/packages/getpackages
 @api_view(["GET"])
 def getAllPackages(request):
     package = Package.objects.all()
     serializer = PackageSerializer(package, many=True)
     return Response(serializer.data)
 
-# Define an API view to retrieve a Package object by its ID
+#api/packages/getpackage/<int:packageId>
 @api_view(["GET"])
 def getPackageById(request, packageId):
     try:
-        # Attempt to retrieve a Package by its primary key (ID)
         package = Package.objects.get(pk=packageId)
-        # Serialize the retrieved package
         serializer = PackageSerializer(package)
-        # Return the serialized package data
         return Response(serializer.data)
     except Package.DoesNotExist:
-        # Return a 404 error response if the package is not found
         return Response({'error': 'Package not found'}, status=status.HTTP_404_NOT_FOUND)
 
-
-@csrf_exempt # Disable CSRF protection for the following view (for demonstration purposes)
-# Define an API view to add a new Package
+ # /api/packages/add
 @api_view(["POST"])
 def addPackage(request):
-    # Serialize the data from the request using PackageSerializer
     serializer = PackageSerializer(data=request.data)
 
     if serializer.is_valid():
-        # If the data is valid, save the new Package
         package = serializer.save()
-        # Return the serialized data with a 201 status code (Created)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
-        # Return validation errors if the data is invalid
         return Response(serializer.errors)
 
-# Define an API view to update an existing Package
+#/api/packages/update/<int:packageId>
 @api_view(["PUT"])
 def updatePackage(request, packageId):
     try:
-        # Attempt to retrieve the existing Package by its ID
         package = Package.objects.get(pk=packageId)
     except Package.DoesNotExist:
-        # Return a 404 error response if the package is not found
         return Response({'error': 'Package not found'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
-        # Serialize the existing Package with the updated data from the request
         serializer = PackageSerializer(package, data=request.data)
         if serializer.is_valid():
-            # If the data is valid, save the updated Package
             serializer.save()
-            # Return the updated data with a 200 status code (OK)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            # Return validation errors with a 400 status code (Bad Request) if the data is invalid
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# Define an API view to delete a Package by its ID
+#/api/packages/delete/<int:packageId>
 @api_view(["DELETE"])
 def deletePackage(request, packageId):
     try:
-        # Attempt to retrieve the Package by its ID
         package = Package.objects.get(pk=packageId)
-        # Delete the Package
         package.delete()
-        # Return a success message with a 204 status code (No Content)
         return Response({'message': 'Package deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
     except Package.DoesNotExist:
-        # Return a 404 error response if the package is not found
         return Response({'error': 'Package not found'}, status=status.HTTP_404_NOT_FOUND)
-    
+
+#/api/packages/offer/<int:packageId>
 @api_view(["PUT"])
 def offeroption(request, packageId):
     try:
@@ -108,6 +85,47 @@ def offeroption(request, packageId):
                 return Response ({"error ":"you should enter a value "},status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response ({"error ": serializer.errors},status=status.HTTP_400_BAD_REQUEST)  
+ #api/packages/edit/<int:packageId>
+@api_view(["PUT"])
+def editoffer (request , packageId):
+    try :
+        package= Package.objects.get(id=packageId)
+    except Package.DoesNotExist:
+         return Response({'error': 'Package not found'}, status=status.HTTP_404_NOT_FOUND)
+    if request.method =='PUT':
+        serializer=PackageSerializer(package,data=request.data, partial=True)
+        if  serializer.is_valid():
+            new_offer = serializer.validated_data.get('offer')
+            if new_offer is not None:
+                if new_offer>=0 and new_offer<=100:
+                    discount = (new_offer/100)*package.price
+                    package.offer=new_offer
+                    package.price =package.price-discount 
+                    package.save()
+                    serializer= PackageSerializer(package)
+                    return Response(serializer.data,status=status.HTTP_200_OK)
+                else:
+                    return Response ({"error ":"invalid offer value "},status=status.HTTP_400_BAD_REQUEST)
                 
-    
+            else:
+                return Response ({"error ":"you should enter a value "},status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response ({"error ": serializer.errors},status=status.HTTP_400_BAD_REQUEST)  
+#api/packages/deleteoffer/<int:packageId>
+@api_view(["DELETE"])
+def delete_offer(request, packageId):
+    try:
+        package = Package.objects.get(id= packageId)
+    except Package.DoesNotExist:
+                 return Response({'error': 'Package not found'}, status=status.HTTP_404_NOT_FOUND)
+    if package.offer is not None:
+        package.offer= None
+        package.price= package.price
+        package.save()
 
+        serializer= PackageSerializer(package)
+        return Response({'message':'offer was deleted successfully','package':serializer.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'error':'no offer to delete was found'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
