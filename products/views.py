@@ -11,7 +11,7 @@ from .models import products
 def getAllProducts(request):
     product = products.objects.all()
     serializer = ProductSerializer(product, many=True)
-    return Response(serializer.data)
+    return Response("x")
 
 #api/products/getproduct/<int:productId>
 @api_view(["GET"])
