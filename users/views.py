@@ -56,7 +56,7 @@ def getAllManagers(req):
 def updateUser(request, userId):
     try:
         user = User.objects.get(pk=userId)
-    except User.DoesNotExist:
+    except:
         return Response({'error': 'User not found'})
 
     serializer = UserSerializer(user, data=request.data)
@@ -102,7 +102,7 @@ def getUserById(request, userId):
         user = User.objects.get(pk=userId)
         serializer = UserSerializer(user)
         return Response(serializer.data)
-    except User.DoesNotExist:
+    except:
         return Response({'error': 'User not found'})
 
 

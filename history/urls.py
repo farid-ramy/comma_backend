@@ -3,6 +3,8 @@ from . import views
 
 urlpatterns = [
     path("" , views.getHistory),
-    path('checkin/<int:user_id>/<int:branch_id>', views.checkIn),
-    path('checkout/<int:user_id>/<int:branch_id>', views.checkOut),
+    path('filter', views.filterHistory),
+    path('delete/<int:historyId>', views.deleteHistory),
+    path('check_in', views.checkIn),
+    path('check_out/<int:historyId>', views.checkOut),
 ]
