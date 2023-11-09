@@ -30,9 +30,8 @@ INSTALLED_APPS = [
     'users',
     'branches',
     'packages',
-    'kitchen',
     'products',
-    'history'
+    'history',
 ]
 
 MIDDLEWARE = [

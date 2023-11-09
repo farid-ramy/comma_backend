@@ -4,8 +4,6 @@ from rest_framework.decorators import api_view
 from django.http import JsonResponse
 from .serializers import UserSerializer
 from .models import User
-from branches.models import WorkingIN
-from branches.serializers import WorkingINSerializer
 
 @api_view(['GEt'])
 def test(request, test):
@@ -98,7 +96,7 @@ def handleLogin(request):
     #     return Response({'error': 'Please enter both username and password'})
     # try:
         # user = User.objects.get(username=username , password=password )
-        working_in = WorkingIN.objects.get(employee_id= 79)
+        # working_in = WorkingIN.objects.get(employee_id= 79)
         # working_in_INSerializer = WorkingINSerializer(working_in)
 
         # serialized_user = {
