@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -7,6 +8,7 @@ from .serializers import HistorySerializer
 from .models import History
 from users.models import User
 from branches.models import Branch
+from django.db.models import Q
 
 @api_view(["GET"])
 def history_list(request):
@@ -40,6 +42,10 @@ def filter_history(request):
     client_id = request.query_params.get('client_id')
     if client_id:
         queryset = queryset.filter(client_id=client_id)
+
+    check_out_time = request.query_params.get('check_out_time')
+    if check_out_time:
+        queryset = queryset.exclude(Q(check_out_time__isnull=False))
 
     serializer = HistorySerializer(queryset, many=True)
     return Response(serializer.data)
@@ -81,7 +87,13 @@ def check_in(request):
         return Response({"error": str(e)})
 
 @api_view(["PUT"])
-def check_out(request):
-    pass
+def check_out(request, history_id):
+    history = get_object_or_404(History, pk=history_id)
+    if history.check_out_time is not None:
+        return JsonResponse({'error': 'History not found'})
+    history.check_out_time = timezone.now()
+    history.payment = request.data.get("payment")
+    history.save()
+    return JsonResponse({'message': 'Check-out successful'})
 
 

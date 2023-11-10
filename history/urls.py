@@ -7,7 +7,5 @@ urlpatterns = [
     path('filter', filter_history, name="filter_history"),
     path('<int:history_id>/delete', delete_history, name="delete_history"),
     path('check_in', check_in, name="check_in"),
-    path('check_out', check_out, name="check_out"),
-
-
+    path('<int:history_id>/check_out', check_out, name="check_out"),
 ]
