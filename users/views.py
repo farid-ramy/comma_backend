@@ -6,8 +6,11 @@ from .serializers import UserSerializer
 
 @api_view(['GET'])
 def user_list(request):
-    users = User.objects.all()
-    serializer = UserSerializer(users, many=True)
+    queryset = User.objects.all()
+    user_type = request.query_params.get('role')
+    if user_type :
+        queryset = queryset.filter(role=user_type)
+    serializer = UserSerializer(queryset, many=True)
     return Response(serializer.data)
 
 @api_view(['GET'])
@@ -23,7 +26,7 @@ def create_user(request):
         serializer.save()
         return Response(serializer.data)
     else:
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors)
 
 @api_view(['PUT'])
 def update_user(request, pk):
@@ -33,7 +36,7 @@ def update_user(request, pk):
         serializer.save()
         return Response(serializer.data)
     else:
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors)
 
 @api_view(['DELETE'])
 def delete_user(request, pk):

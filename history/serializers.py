@@ -1,4 +1,3 @@
-# serializers.py
 from rest_framework import serializers
 from .models import History
 
@@ -16,24 +15,31 @@ class HistorySerializer(serializers.ModelSerializer):
 
     def get_client_id(self, history):
         return {
-            "id": history.client.id,
-            "role": history.client.role,
-            "first_name": history.client.first_name,
-            "last_name": history.client.last_name,
-            "username": history.client.username,
-            "password": history.client.password,
-            "phone": history.client.phone,
-            "email": history.client.email,
-            "national_id": history.client.national_id,
-            "age": history.client.age,
-            "job": history.client.job,
-            "address": history.client.address,
-            "created_at": history.client.created_at.isoformat(),
-            "modified_at": history.client.modified_at.isoformat(),
+            "id": history.client_id.id,
+            "role": history.client_id.role,
+            "first_name": history.client_id.first_name,
+            "last_name": history.client_id.last_name,
+            "username": history.client_id.username,
+            "password": history.client_id.password,
+            "phone": history.client_id.phone,
+            "email": history.client_id.email,
+            "national_id": history.client_id.national_id,
+            "age": history.client_id.age,
+            "job": history.client_id.job,
+            "address": history.client_id.address,
+            "created_at": history.client_id.created_at.isoformat(),
+            "modified_at": history.client_id.modified_at.isoformat(),
         }
 
     def get_employee_id(self, history):
-        return history.employee.id
+        return {
+            "id": history.employee_id.id,
+            "role": history.employee_id.role,
+            "first_name": history.employee_id.first_name,
+            "last_name": history.employee_id.last_name,
+        }
 
     def get_branch_id(self, history):
-        return history.branch.id
+        return {
+            "name":history.branch_id.name
+        }

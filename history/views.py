@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import HistorySerializer
 from .models import History
-from django.utils import timezone 
+from users.models import User
+from branches.models import Branch
 
 @api_view(["GET"])
 def history_list(request):
@@ -21,7 +22,7 @@ def history_detail(request, history_id):
     return JsonResponse(serializer.data)
 
 @api_view(["GET"])
-def filterHistory(request):
+def filter_history(request):
     queryset = History.objects.all()
 
     check_in_time = request.query_params.get('check_in_time')
@@ -44,39 +45,34 @@ def filterHistory(request):
     return Response(serializer.data)
 
 @api_view(["DELETE"])
-def deleteHistory(request, historyId):
+def delete_history(request, history_id):
     try:
-        history = History.objects.get(pk=historyId)
+        history = History.objects.get(pk=history_id)
         history.delete()
         return Response({'message': 'History deleted successfully'})
     except History.DoesNotExist:
         return Response({'error': 'History not found'})
 
-@csrf_exempt
 @api_view(["POST"])
-def checkIn(request):
-    serializer = HistorySerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    else:
-        return Response(serializer.errors)
-
-@api_view(["PUT"])
-def checkOut(request, historyId):
+def check_in(request):
     try:
-        history_instance = History.objects.get(pk=historyId)
-    except History.DoesNotExist:
-        return Response({'error': 'History not found'})
+        instance = History(
+            client_id = User.objects.get(pk=request.data.get('client_id')),
+            employee_id = User.objects.get(pk=request.data.get('employee_id')),
+            branch_id = Branch.objects.get(pk=request.data.get('branch_id')),
+        )
+        
+        instance.save()
+        return Response({"message": "Instance added successfully"})
+    except User.DoesNotExist:
+        return Response({"error": "User does not exist"})
+    except Branch.DoesNotExist:
+        return Response({"error": "Branch does not exist"})
+    except Exception as e:
+        return Response({"error": str(e)})
 
-    payment = request.data.get('payment')
 
-    if payment is not None:
-        history_instance.check_out_time = timezone.now()
-        history_instance.payment = payment
-        history_instance.save()
 
-        serializer = HistorySerializer(history_instance)
-        return Response(serializer.data)
-    else:
-        return Response({'error': 'Payment is required'})
+
+
+

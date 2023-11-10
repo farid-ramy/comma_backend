@@ -11,4 +11,4 @@ class History(models.Model):
    payment = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
    def __str__(self):
-      return f"{self.client_id.first_name} -> {self.check_in_time}"
+      return f"{self.client_id.first_name} -> {self.check_in_time.strftime("%Y-%m-%d %H:%M:%S")}"
