@@ -39,3 +39,23 @@ def getAllProductsInBranch(request, branchId):
     else:
         return Response({'error': 'No products found in the branch'}, status=status.HTTP_404_NOT_FOUND)
      
+@api_view(["PUT"])
+def updateproduct(request, productId,branchId):
+    try:
+        product= products.objects.get(branch_id= branchId,pk= productId)
+    except products.DoesNotExist:
+        return Response({'error':'product isnot found '},status=status.HTTP_404_NOT_FOUND)
+    if request.method=="PUT":
+        serializer=ProductSerializer(product,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status= status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors,status= status.HTTP_404_NOT_FOUND)
+        
+            
+             
+        
+        
+        
+                   
