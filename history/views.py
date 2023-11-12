@@ -1,22 +1,82 @@
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .serializers import HistorySerializer
+from .serializers import HistorySerializer, CreateHistorySerializer
 from .models import History
 from users.models import User
 from branches.models import Branch
 from django.db.models import Q
 
-@api_view(["GET"])
-def history_list(request):
-    histories = History.objects.all()
-    serializer = HistorySerializer(histories, many=True)
-    return JsonResponse(serializer.data , safe=False)
+@api_view(["POST"])
+def history_create(request):
+    
+    client_id = request.data.get('client_id')
+    employee_id = request.data.get('employee_id')
+    branch_id = request.data.get('branch_id')
 
-@csrf_exempt
+    if not client_id or not User.objects.filter(pk=client_id).exists():
+        return Response({"error": "Invalid or missing client_id"})
+
+    if not employee_id or not User.objects.filter(pk=employee_id).exists():
+        return Response({"error": "Invalid or missing employee_id"})
+
+    if not branch_id or not Branch.objects.filter(pk=branch_id).exists():
+        return Response({"error": "Invalid or missing branch_id"})
+
+    serializer = CreateHistorySerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors)
+
+@api_view(["GET"])
+def list_histories(request):
+    query_params = request.query_params
+    query = {}
+    for key, value in query_params.items():
+        if not key or not value:
+            return Response({"error": "Invalid query parameter provided."})
+        query[key] = value
+
+    try:
+        histories = History.objects.filter(**query)
+        serializer = HistorySerializer(histories, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({"error": str(e)})
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @api_view(["GET"])
 def history_detail(request, history_id):
     history = get_object_or_404(History, id=history_id)
@@ -25,30 +85,31 @@ def history_detail(request, history_id):
 
 @api_view(["GET"])
 def filter_history(request):
-    queryset = History.objects.all()
+    pass
+    # queryset = History.objects.all()
 
-    check_in_time = request.query_params.get('check_in_time')
-    if check_in_time:
-        queryset = queryset.filter(check_in_time__date=check_in_time)
+    # check_in_time = request.query_params.get('check_in_time')
+    # if check_in_time:
+    #     queryset = queryset.filter(check_in_time__date=check_in_time)
 
-    branch_id = request.query_params.get('branch_id')
-    if branch_id:
-        queryset = queryset.filter(branch_id=branch_id)
+    # branch_id = request.query_params.get('branch_id')
+    # if branch_id:
+    #     queryset = queryset.filter(branch_id=branch_id)
 
-    employee_id = request.query_params.get('employee_id')
-    if employee_id:
-        queryset = queryset.filter(employee_id=employee_id)
+    # employee_id = request.query_params.get('employee_id')
+    # if employee_id:
+    #     queryset = queryset.filter(employee_id=employee_id)
 
-    client_id = request.query_params.get('client_id')
-    if client_id:
-        queryset = queryset.filter(client_id=client_id)
+    # client_id = request.query_params.get('client_id')
+    # if client_id:
+    #     queryset = queryset.filter(client_id=client_id)
 
-    check_out_time = request.query_params.get('check_out_time')
-    if check_out_time:
-        queryset = queryset.exclude(Q(check_out_time__isnull=False))
+    # check_out_time = request.query_params.get('check_out_time')
+    # if check_out_time:
+    #     queryset = queryset.exclude(Q(check_out_time__isnull=False))
 
-    serializer = HistorySerializer(queryset, many=True)
-    return Response(serializer.data)
+    # serializer = HistorySerializer(queryset, many=True)
+    # return Response(serializer.data)
 
 @api_view(["DELETE"])
 def delete_history(request, history_id):

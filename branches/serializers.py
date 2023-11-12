@@ -1,14 +1,13 @@
-from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from .models import Branch
 from users.models import User
 
-class UserSerializer(ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = "__all__"
 
-class BranchSerializer(ModelSerializer):
+class BranchSerializer(serializers.ModelSerializer):
     users = serializers.SerializerMethodField()
 
     class Meta:
@@ -19,7 +18,7 @@ class BranchSerializer(ModelSerializer):
       users = User.objects.filter(branch=obj)
       return UserSerializer(users, many=True).data
 
-class CreateBranchSerializer(ModelSerializer):
+class CreateBranchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Branch
         fields = "__all__"

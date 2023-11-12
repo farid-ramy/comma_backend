@@ -6,7 +6,7 @@ from .serializers import BranchSerializer, CreateBranchSerializer
 
 # /api/branches/create
 @api_view(['POST'])
-def branch_create(request):
+def create_branch(request):
     serializer = CreateBranchSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
