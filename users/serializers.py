@@ -2,17 +2,22 @@ from rest_framework import serializers
 from users.models import User
 from branches.models import Branch
 
+class BranchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Branch
+        fields = '__all__'
+
 class UserSerializer(serializers.ModelSerializer):
-    branch_id = serializers.SerializerMethodField()
+    branch = BranchSerializer()
 
     class Meta:
         model = User
-        fields = [
-            'id', 'role', 'first_name', 'last_name', 'username', 'password',
-            'phone', 'email', 'national_id', 'age', 'job', 'address',
-            'created_at', 'modified_at', 'branch_id'
-        ]
+        fields = "__all__"
 
-    def get_branch_id(self, user):
-        branch = user.working_employees.first()
-        return branch.id if branch else None
+class CreateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__"
+
+
+

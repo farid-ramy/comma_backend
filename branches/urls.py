@@ -1,10 +1,10 @@
 from django.urls import path
-from .views import branch_list, branch_detail, branch_create, branch_update, branch_delete
+from .views import list_branches, get_branch, branch_create, update_branch, delete_branch
 
 urlpatterns = [
-    path('', branch_list, name='branch_list'),
-    path('<int:branch_id>', branch_detail, name='branch_detail'),
     path('create', branch_create, name='branch_create'),
-    path('<int:branch_id>/update', branch_update, name='branch_update'),
-    path('<int:branch_id>/delete', branch_delete, name='branch_delete'),
+    path('', list_branches, name='list_branches'),
+    path('<int:branch_id>', get_branch, name='get_branch'),
+    path('<int:branch_id>/update', update_branch, name='update_branch'),
+    path('<int:branch_id>/delete', delete_branch, name='delete_branch'),
 ]
