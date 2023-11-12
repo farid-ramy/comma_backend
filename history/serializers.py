@@ -19,22 +19,22 @@ class CreateHistorySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class HistorySerializer(serializers.ModelSerializer):
-    client = serializers.SerializerMethodField()
-    employee = serializers.SerializerMethodField()
-    branch = serializers.SerializerMethodField()
+    client_id = serializers.SerializerMethodField()
+    employee_id = serializers.SerializerMethodField()
+    branch_id = serializers.SerializerMethodField()
 
     class Meta:
         model = History
         fields = "__all__"
 
-    def get_client(self, obj):
+    def get_client_id(self, obj):
         client = User.objects.filter(branch=obj)
         return UserSerializer(client, many=True).data
 
-    def get_employee(self, obj):
+    def get_employee_id(self, obj):
         client = User.objects.filter(branch=obj)
         return UserSerializer(client, many=True).data
 
-    def get_branch(self, obj):
+    def get_branch_id(self, obj):
         branch = Branch.objects.filter(branch=obj)
         return BranchSerializer(branch, many=True).data

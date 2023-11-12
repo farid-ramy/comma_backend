@@ -11,7 +11,6 @@ from django.db.models import Q
 
 @api_view(["POST"])
 def history_create(request):
-    
     client_id = request.data.get('client_id')
     employee_id = request.data.get('employee_id')
     branch_id = request.data.get('branch_id')

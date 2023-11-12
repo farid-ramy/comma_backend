@@ -1,13 +1,10 @@
 from django.urls import path
-from . import views
+from .views import create_package, list_packages, get_package, update_package, delete_package
 
 urlpatterns = [
-    path("add", views.addPackage),
-    path("getpackages", views.getAllPackages),
-    path("update/<int:packageId>", views.updatePackage),
-    path("getpackage/<int:packageId>/", views.getPackageById),
-    path("delete/<int:packageId>", views.deletePackage),
-    path("offer/<int:packageId>",views.offeroption),
-    path("edit/<int:packageId>", views.editoffer),
-    path("deleteoffer/<int:packageId>", views.delete_offer)
+    path("create", create_package, name='create_package'),
+    path("", list_packages, name="list_packages"),
+    path("<int:package_id>", get_package, name="get_package"),
+    path("<int:package_id>/update", update_package, name="update_package"),
+    path("<int:package_id>/delete", delete_package, name="delete_package"),
 ]
