@@ -6,6 +6,6 @@ urlpatterns = [
     path('api/packages/', include('packages.urls')),
     path('api/branches/',include ("branches.urls")),
     path('api/history/',include ("history.urls")),
-    path ('api/products/',include ("products.urls")),
+    path('api/products/',include ("products.urls")),
     path('admin/', admin.site.urls),
 ]
