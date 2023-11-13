@@ -15,15 +15,16 @@ class BranchSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     branch = BranchSerializer()
-    # history = serializers.SerializerMethodField()
+    history = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = "__all__"
 
-    # def get_history(self, obj):
-    #     Histories = History.objects.filter(history=obj)
-    #     return HistorySerializer(Histories, many=True).data
+    def get_history(self, obj):
+        histories = History.objects.filter(client = obj)
+        return HistorySerializer(histories, many=True).data
+
 
 class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
