@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'packages',
     'products',
     'history',
+    'rooms'
 ]
 
 MIDDLEWARE = [
