@@ -3,9 +3,9 @@ from users.models import User
 from branches.models import Branch
 
 class History(models.Model):
-   client_id = models.ForeignKey(User, on_delete=models.SET_DEFAULT, related_name="client_id", null=True, blank=True, default=None)
-   employee_id = models.ForeignKey(User, on_delete=models.SET_DEFAULT, related_name="employee_id", null=True, blank=True, default=None)
-   branch_id = models.ForeignKey(Branch, on_delete=models.SET_DEFAULT, related_name="branch_id", null=True, blank=True, default=None)
+   client = models.ForeignKey(User, on_delete=models.SET_DEFAULT, related_name="client", null=True, blank=True, default=None)
+   employee = models.ForeignKey(User, on_delete=models.SET_DEFAULT, related_name="employee", null=True, blank=True, default=None)
+   branch = models.ForeignKey(Branch, on_delete=models.SET_DEFAULT, related_name="branch", null=True, blank=True, default=None)
    check_in_time = models.DateTimeField(auto_now_add=True)
    check_out_time = models.DateTimeField(null=True, blank=True)
    payment = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)

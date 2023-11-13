@@ -11,18 +11,18 @@ from django.db.models import Q
 
 @api_view(["POST"])
 def history_create(request):
-    client_id = request.data.get('client_id')
-    employee_id = request.data.get('employee_id')
-    branch_id = request.data.get('branch_id')
+    client = request.data.get('client')
+    employee = request.data.get('employee')
+    branch = request.data.get('branch')
 
-    if not client_id or not User.objects.filter(pk=client_id).exists():
-        return Response({"error": "Invalid or missing client_id"})
+    if not client or not User.objects.filter(pk=client).exists():
+        return Response({"error": "Invalid or missing client"})
 
-    if not employee_id or not User.objects.filter(pk=employee_id).exists():
-        return Response({"error": "Invalid or missing employee_id"})
+    if not employee or not User.objects.filter(pk=employee).exists():
+        return Response({"error": "Invalid or missing employee"})
 
-    if not branch_id or not Branch.objects.filter(pk=branch_id).exists():
-        return Response({"error": "Invalid or missing branch_id"})
+    if not branch or not Branch.objects.filter(pk=branch).exists():
+        return Response({"error": "Invalid or missing branch"})
 
     serializer = CreateHistorySerializer(data=request.data)
     if serializer.is_valid():
@@ -91,17 +91,17 @@ def filter_history(request):
     # if check_in_time:
     #     queryset = queryset.filter(check_in_time__date=check_in_time)
 
-    # branch_id = request.query_params.get('branch_id')
-    # if branch_id:
-    #     queryset = queryset.filter(branch_id=branch_id)
+    # branch = request.query_params.get('branch')
+    # if branch:
+    #     queryset = queryset.filter(branch=branch)
 
-    # employee_id = request.query_params.get('employee_id')
-    # if employee_id:
-    #     queryset = queryset.filter(employee_id=employee_id)
+    # employee = request.query_params.get('employee')
+    # if employee:
+    #     queryset = queryset.filter(employee=employee)
 
-    # client_id = request.query_params.get('client_id')
-    # if client_id:
-    #     queryset = queryset.filter(client_id=client_id)
+    # client = request.query_params.get('client')
+    # if client:
+    #     queryset = queryset.filter(client=client)
 
     # check_out_time = request.query_params.get('check_out_time')
     # if check_out_time:
@@ -122,23 +122,23 @@ def delete_history(request, history_id):
 @api_view(["POST"])
 def check_in(request):
     try:
-        client_id = request.data.get('client_id')
-        employee_id = request.data.get('employee_id')
-        branch_id = request.data.get('branch_id')
+        client = request.data.get('client')
+        employee = request.data.get('employee')
+        branch = request.data.get('branch')
 
-        if not client_id or not User.objects.filter(pk=client_id).exists():
-            return Response({"error": "Invalid or missing client_id"})
+        if not client or not User.objects.filter(pk=client).exists():
+            return Response({"error": "Invalid or missing client"})
 
-        if not employee_id or not User.objects.filter(pk=employee_id).exists():
-            return Response({"error": "Invalid or missing employee_id"})
+        if not employee or not User.objects.filter(pk=employee).exists():
+            return Response({"error": "Invalid or missing employee"})
 
-        if not branch_id or not Branch.objects.filter(pk=branch_id).exists():
-            return Response({"error": "Invalid or missing branch_id"})
+        if not branch or not Branch.objects.filter(pk=branch).exists():
+            return Response({"error": "Invalid or missing branch"})
 
         instance = History(
-            client_id=User.objects.get(pk=client_id),
-            employee_id=User.objects.get(pk=employee_id),
-            branch_id=Branch.objects.get(pk=branch_id),
+            client=User.objects.get(pk=client),
+            employee=User.objects.get(pk=employee),
+            branch=Branch.objects.get(pk=branch),
         )
 
         instance.save()
