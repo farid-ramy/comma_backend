@@ -12,6 +12,6 @@ class Room(models.Model):
 class Reservation(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     client= models.ForeignKey(User, on_delete=models.CASCADE, related_name='client_id', default=None)
-    start_time = models.DateTimeField(auto_now_add=True)
-    end_time = models.DateTimeField(null=True, blank=True)
+    start_time = models.DateTimeField(default=None,null = True,blank= True)
+    end_time = models.DateTimeField(default=None,null= True,blank= True)
     
