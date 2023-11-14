@@ -14,4 +14,7 @@ class Reservation(models.Model):
     client= models.ForeignKey(User, on_delete=models.CASCADE, related_name='client_id', default=None)
     start_time = models.DateTimeField(default=None,null = True,blank= True)
     end_time = models.DateTimeField(default=None,null= True,blank= True)
+
+    def __str__(self) :
+        return f"{self.room.name} {self.client.first_name} {self.start_time}"
     

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Branch
 from users.models import User
 from packages.models import Package
-from rooms.models import Room
+from rooms.models import Room,Reservation
 
 class PackageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,10 +19,16 @@ class RoomSerializer(serializers.ModelSerializer):
         model = Room
         fields = "__all__"
 
+class ReservationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reservation
+        fields = "__all__"
+
 class BranchSerializer(serializers.ModelSerializer):
     users = serializers.SerializerMethodField()
     packages = serializers.SerializerMethodField()
     rooms = serializers.SerializerMethodField()
+    reservations = serializers.SerializerMethodField()
 
     class Meta:
         model = Branch
@@ -39,6 +45,12 @@ class BranchSerializer(serializers.ModelSerializer):
     def get_rooms(self, obj):
       rooms = Room.objects.filter(branch=obj)
       return RoomSerializer(rooms, many=True).data
+    
+    def get_reservations(self, obj):
+        rooms = Room.objects.filter(branch=obj)
+        reservations = Reservation.objects.filter(room__in=rooms)
+
+        return ReservationSerializer(reservations, many=True).data
 
 class CreateBranchSerializer(serializers.ModelSerializer):
     class Meta:
