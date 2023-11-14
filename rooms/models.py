@@ -4,11 +4,14 @@ from users.models import User
 
 class Room(models.Model):
     name = models.CharField(max_length=100)
-    branch = models.ForeignKey(Branch , on_delete=models.CASCADE, related_name='branch', default=None)
+    branch = models.ForeignKey(Branch , on_delete=models.CASCADE, related_name='branch_id', default=None)
 
+    def __str__(self) :
+        return f"{self.name} {self.branch.name}"
+    
 class Reservation(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    client= models.ForeignKey(User, on_delete=models.CASCADE, related_name='client', default=None)
+    client= models.ForeignKey(User, on_delete=models.CASCADE, related_name='client_id', default=None)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=True, blank=True)
     
