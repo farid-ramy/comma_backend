@@ -14,7 +14,7 @@ def create_product(request):
     else:
         return Response(serializer.errors)
     
-# /api/products/get
+# /api/products
 @api_view(['GET'])
 def list_products(request):
     query_params = request.query_params
@@ -31,7 +31,7 @@ def list_products(request):
     except Exception as e:
         return Response({"error": str(e)})
 
-# /api/products/get/<int:product_id>
+# /api/products/<int:product_id>
 @api_view(['GET'])
 def get_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
