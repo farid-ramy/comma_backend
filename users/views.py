@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import User
 from .serializers import UserSerializer, CreateUserSerializer
-from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view
 
 # # /api/users/create
 class create_user(APIView):
@@ -56,19 +56,18 @@ class delete_user(APIView):
         user.delete()
         return Response({'message': 'User deleted successfully'})
 
-# # /api/users/login
-class login_user(APIView):
+# /api/users/login
+class LoginUser(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
 
         if username is None or password is None:
-            return Response({'error': 'Please enter both username and password'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Please enter both username and password'})
 
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
+        try:
+            user = User.objects.get(username=username, password=password)
             serializer = UserSerializer(user)
             return Response(serializer.data)
-        else:
-            return Response({'error': 'Wrong username or password'}, status=status.HTTP_401_UNAUTHORIZED)
+        except User.DoesNotExist:
+            return Response({'error': 'Wrong username or password'})
