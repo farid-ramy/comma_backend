@@ -50,14 +50,12 @@ class update_user(APIView):
             return Response(serializer.data)
         else:
             return Response(serializer.errors)
-        
-
-# # /api/users/<int:user_id>/delete
-# @api_view(['DELETE'])
-# def delete_user(request, user_id):
-#     user = get_object_or_404(User, id=user_id)
-#     user.delete()
-#     return Response({'message': 'User deleted successfully'})
+# /api/users/<int:user_id>/delete
+class delete_user(APIView):
+    def delete_user(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+        user.delete()
+        return Response({'message': 'User deleted successfully'})
 
 # # /api/users/login
 # @api_view(['POST'])
