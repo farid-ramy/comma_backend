@@ -15,11 +15,12 @@ class create_branch(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # # /api/branches
-# @api_view(['GET'])
-# def list_branches(request):
-#     branches = Branch.objects.all()
-#     serializer = BranchSerializer(branches, many=True)
-#     return Response(serializer.data)
+class list_branches(APIView):
+    def get(self, request):
+        branches = Branch.objects.all()
+        serializer = BranchSerializer(branches, many=True)
+        return Response(serializer.data)
+
 
 # # /api/branches/<int:branch_id>
 # @api_view(['GET'])
