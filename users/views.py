@@ -40,18 +40,17 @@ class get_branch(APIView):
         serializer = UserSerializer(branch)
         return Response(serializer.data)
 
-
-
-# # /api/users/<int:user_id>/update
-# @api_view(['PUT'])
-# def update_user(request, user_id):
-#     user = get_object_or_404(User, id=user_id)
-#     serializer = CreateUserSerializer(user, data=request.data)
-#     if serializer.is_valid():
-#         serializer.save()
-#         return Response(serializer.data)
-#     else:
-#         return Response(serializer.errors)
+# /api/users/<int:user_id>/update
+class update_user(APIView):
+    def update_user(self, request, user_id):
+        user= get_object_or_404(User, id=user_id)
+        serializer=CreateUserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
+        
 
 # # /api/users/<int:user_id>/delete
 # @api_view(['DELETE'])
