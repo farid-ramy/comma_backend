@@ -21,13 +21,12 @@ class list_branches(APIView):
         serializer = BranchSerializer(branches, many=True)
         return Response(serializer.data)
 
-
-# # /api/branches/<int:branch_id>
-# @api_view(['GET'])
-# def get_branch(request, branch_id):
-#     branch = get_object_or_404(Branch, id=branch_id)
-#     serializer = BranchSerializer(branch)
-#     return Response(serializer.data)
+# /api/branches/<int:branch_id>
+class get_branch(APIView):
+    def get(self, request, branch_id):
+        branch = get_object_or_404(Branch, id=branch_id)
+        serializer = BranchSerializer(branch)
+        return Response(serializer.data)
 
 # # /api/branches/<int:branch_id>/update
 # @api_view(['PUT'])
