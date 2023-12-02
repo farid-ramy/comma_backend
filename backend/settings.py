@@ -125,5 +125,5 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Replace with your React app's domain (frontend)
 ]
-APPEND_SLASH = False  # Add this line
+# APPEND_SLASH = False  # Add this line
     
