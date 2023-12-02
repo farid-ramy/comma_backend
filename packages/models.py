@@ -15,7 +15,17 @@ class Package (models.Model):
 
     def __str__(self):
         return self.name
-
+    
+class PackageAttribute(models.Model):
+    package= models.ForeignKey(Package, on_delete=models.CASCADE)
+    attribute_name=models.CharField(max_length=50)
+    attribute_value=  models.CharField(max_length=225)
+    
+    class meta:
+        unique_together= ['package','attribute_name']   
+    
+    def __str__(self) :
+        return f"{self.package}-{self.attribute_name}:{self.attribute_value}"    
 
 
 
