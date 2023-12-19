@@ -34,9 +34,9 @@ class list_users(APIView):
 
 # /api/users/get/<int:user_id>
 class get_user(APIView):
-    def get(self, request, branch_id):
-        branch = get_object_or_404(User, id=branch_id)
-        serializer = UserSerializer(branch)
+    def get(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+        serializer = UserSerializer(user)
         return Response(serializer.data)
 
 # /api/users/<int:user_id>/update
