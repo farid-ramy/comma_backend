@@ -8,6 +8,7 @@ urlpatterns = [
     path('api/history/',include ("history.urls")),
     path('api/products/',include ("products.urls")),
     path('api/rooms/',include ("rooms.urls")),
+    path('api/chatbot/',include ("chatbot.urls")),
 
     path('admin/', admin.site.urls),
 ]
